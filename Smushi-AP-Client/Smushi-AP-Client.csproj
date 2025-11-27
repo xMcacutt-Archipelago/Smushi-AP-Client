@@ -51,8 +51,17 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy
-            SourceFiles="$(TargetPath)"
-            DestinationFiles="F:\SteamLibrary\steamapps\common\Smushi Come Home\BepInEx\plugins\Smushi-AP-Client\$(TargetFileName)" />
+        <Copy
+                SourceFiles="$(TargetPath)"
+                DestinationFiles="F:\SteamLibrary\steamapps\common\Smushi Come Home\BepInEx\plugins\Smushi-AP-Client\$(TargetFileName)" />
+        <Copy
+                SourceFiles="$(TargetPath)"
+                DestinationFolder="$(ProjectDir)Package\Smushi_Archipelago"
+                OverwriteReadOnlyFiles="true" />
+        <Copy
+                SourceFiles="$(ProjectDir)../README.md"
+                DestinationFolder="$(ProjectDir)Package"
+                OverwriteReadOnlyFiles="true" />
+        <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ProjectDir)Package\*' -DestinationPath '$(ProjectDir)xMcacutt-Smushi_Archipelago.zip' -Force&quot;" />
     </Target>
 </Project>

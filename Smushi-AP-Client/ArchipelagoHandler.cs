@@ -142,6 +142,11 @@ namespace Smushi_AP_Client
                     Thread.Sleep(100);
         }
 
+        public void Hint(long id)
+        {
+            _session.Hints.CreateHints(HintStatus.Unspecified, id);
+        }
+
         public bool IsLocationChecked(long id)
         {
             return _session.Locations.AllLocationsChecked.Contains(id);
