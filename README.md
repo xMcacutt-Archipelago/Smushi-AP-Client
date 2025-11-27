@@ -7,14 +7,14 @@ For the APWorld for Smushi see [Smushi APWorld](https://github.com/xMcacutt-Arch
 
 #### Mod Manager - RECOMMENDED ONCE OPERATIONAL
 
-If you are reading this on Thunderstore, great! Simply download the [Thunderstore Mod Manager](https://thunderstore.io/), follow the instructions to set up KeyWe and install the [Archipelago client mod](https://thunderstore.io/c/smushicomehome/p/xMcacutt/Smushi_Archipelago/).
+If you are reading this on Thunderstore, great! Simply download the [Thunderstore Mod Manager](https://thunderstore.io/), follow the instructions to set up Smushi Come Home and install the [Archipelago client mod](https://thunderstore.io/c/smushicomehome/p/xMcacutt/Smushi_Archipelago/).
 This is the recommended installation method but manual installation is also possible and described below.
 
 #### Manual Installation
 
 First, download the latest release from the releases page and extract.
 
-To Install MANUALLY, you'll need to install [BepinEx](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.4). Navigate to your KeyWe folder, which should be in steamapps/common/KeyWe, and copy the Bepin files into this folder. Then run KeyWe.exe. this will create the necessary subdirectories for Bepin to function and for mods to load.
+To Install MANUALLY, you'll need to install [BepinEx](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.4). Navigate to your Smushi folder, which should be in steamapps/common/SmushiComeHome, and copy the Bepin files into this folder. Then run Smushi Come Home.exe. this will create the necessary subdirectories for Bepin to function and for mods to load.
 
 Next, close the game and navigate to the plugins folder in the BepInEx folder, and copy the Smushi_Archipelago folder from the latest release into into it.
 
