@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>disable</Nullable>
+        <RootNamespace>Smushi_AP_Client</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.0"/>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.Core" Version="5.*"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*"/>
+        <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="UnityEngine.Modules" Version="2021.3.38.8007589" IncludeAssets="compile"/>
+        <Publicize Include="Assembly-CSharp"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Reference Include="Assembly-CSharp">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\Assembly-CSharp.dll</HintPath>
+      </Reference>
+      <Reference Include="FMODUnity">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\FMODUnity.dll</HintPath>
+      </Reference>
+      <Reference Include="Unity.TextMeshPro">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\UnityEngine.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine.CoreModule">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine.InputLegacyModule">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine.TextRenderingModule">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine.UI">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\UnityEngine.UI.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine.UIModule">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Copy
+            SourceFiles="$(TargetPath)"
+            DestinationFiles="F:\SteamLibrary\steamapps\common\Smushi Come Home\BepInEx\plugins\Smushi-AP-Client\$(TargetFileName)" />
+    </Target>
+</Project>
