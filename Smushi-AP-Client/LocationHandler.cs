@@ -617,6 +617,7 @@ namespace Smushi_AP_Client
                 __instance.pickup.isNearItem = false;
                 __instance.pickup.detectedObject = null;
                 __instance.rope.SetActive(false);
+                PluginMain.ArchipelagoHandler.CheckLocation(0x402);
                 __instance.StartCoroutine(__instance.ContinueDialogue());
                 return false;
             }
@@ -673,6 +674,7 @@ namespace Smushi_AP_Client
                 __instance.objectUI.SetText(__instance.item);
                 __instance.objectUI.SetUI(true, 0);
                 __instance.screwModel.SetActive(false);
+                PluginMain.ArchipelagoHandler.CheckLocation(0x501);
                 __instance.StartCoroutine(__instance.ContinueDialogue());
                 __instance.dialogue.StartNodeName = "ScavengerChat";
                 return false;
@@ -704,6 +706,8 @@ namespace Smushi_AP_Client
             [HarmonyPrefix]
             public static bool OnTriggerRingReward(RingTradeInteraction __instance)
             {
+                if (__instance.pd.ringCount < 3)
+                    return false;
                 if (__instance.pd.ringCount == 3)
                 {
                     PluginMain.ArchipelagoHandler.CheckLocation(0x509);
@@ -754,6 +758,93 @@ namespace Smushi_AP_Client
             }
         }
 
+
+        [HarmonyPatch(typeof(WaterRockActivity))]
+        public class WaterRockActivity_Patch
+        {
+            [HarmonyPatch("SkinReward")]
+            [HarmonyPrefix]
+            public static bool SkinReward(WaterRockActivity __instance)
+            {
+                PluginMain.ArchipelagoHandler.CheckLocation(0x708);
+                __instance.objectUI.SetTextAugmenter(__instance.augmenter);
+                __instance.objectUI.SetUI(true, 4);
+                __instance.StartCoroutine(__instance.ContinueDialogue());
+                return false;
+            }
+
+            [HarmonyPatch("EndActivity")]
+            [HarmonyPrefix]
+            public static bool EndActivity(WaterRockActivity __instance)
+            {
+                __instance.StartCoroutine(EndRockActivity(__instance));
+                return false;
+            } 
+
+            private static IEnumerator EndRockActivity(WaterRockActivity __instance)
+            {
+                __instance.pauser.PauseThePlayer();
+                __instance.counter.gameObject.SetActive(false);
+                __instance.dtb.gameObject.SetActive(true);
+                __instance.dtb.dialogueIsRunning = true;
+                __instance.uiFade.FadeIn();
+                yield return new WaitForSeconds(1f);
+                __instance.SetupRockLocations(false);
+                __instance.capy.position = __instance.capyTeleportReturnPOS.position;
+                __instance.goalParticle.Stop();
+                foreach (GameObject placeholder in __instance.placeholders)
+                    placeholder.SetActive(false);
+                if (__instance.pickup.isHoldingItem)
+                {
+                    __instance.pickup.DropItem();
+                    __instance.pickup.UnsetObjectOnPlayer();
+                }
+                __instance.pickup.isNearItem = false;
+                __instance.pickup.detectedObject = null;
+                __instance.player.position = __instance.positions[0].position;
+                __instance.npcIK.SetAimTarget();
+                if (__instance.hook.isClimbing)
+                    __instance.hook.DisableHookFromCutscene();
+                if (__instance.tpc.IsSwimming())
+                {
+                    __instance.tpc.isDiving = false;
+                    __instance.tpc.ResetSwimTeleport();
+                    __instance.diveController.ResetParticlesFromActivity();
+                }
+                __instance.dtb.SetPlayerRotation();
+                __instance.dtb.SwitchToDialogueCam(false);
+                yield return new WaitForSeconds(1f);
+                __instance.diveController.DisableLowpass();
+                __instance.uiFade.FadeOut();
+                yield return new WaitForSeconds(0.5f);
+                __instance.hook.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
+                if (__instance.rockCount == 2)
+                {
+                    __instance.dtb.StartDialogue("DiverEndSuccess");
+                    __instance.pd.dialogBools["beatDiver"] = true;
+                }
+                else
+                    __instance.dtb.StartDialogue("DiverEndFail");
+            }
+        }
+
+
+        [HarmonyPatch(typeof(GlowbugInteraction))]
+        public class GlowbugInteraction_Patch
+        {
+            [HarmonyPatch("GiveRainbowAug")]
+            [HarmonyPrefix]
+            public static bool GiveRainbowAug(GlowbugInteraction __instance)
+            {
+                PluginMain.ArchipelagoHandler.CheckLocation(0x70C);
+                __instance.objectUI.SetTextAugmenter(__instance.augmenter);
+                __instance.objectUI.SetUI(true, 1);
+                __instance.StartCoroutine(__instance.ContinueDialogue());
+                return false;
+            }
+        }
+       
+        
         // AUGMENTER CHECKS
         [HarmonyPatch(typeof(SkinObjectPickup))]
         public class SkinObjectPickup_Patch

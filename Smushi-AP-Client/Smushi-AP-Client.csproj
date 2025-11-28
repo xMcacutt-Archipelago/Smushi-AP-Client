@@ -24,6 +24,9 @@
       <Reference Include="Assembly-CSharp">
         <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\Assembly-CSharp.dll</HintPath>
       </Reference>
+      <Reference Include="Cinemachine">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\Cinemachine.dll</HintPath>
+      </Reference>
       <Reference Include="FMODUnity">
         <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\FMODUnity.dll</HintPath>
       </Reference>

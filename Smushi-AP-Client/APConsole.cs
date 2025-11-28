@@ -7,6 +7,7 @@ using Rewired.Integration.UnityUI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.IO;
 using UnityEngine.UI;
 
 namespace Smushi_AP_Client
@@ -168,7 +169,10 @@ namespace Smushi_AP_Client
             Instance = consoleObject.AddComponent<APConsole>();
             Instance.BuildUI();
             Instance.Log("Welcome to Smushi Come Home");
-
+            // foreach (var word in KeywordColors.Keys)
+            // {
+            //     Instance.Log(word);
+            // }
         }
 
         private void UpdateMessages(float delta)
@@ -412,50 +416,147 @@ namespace Smushi_AP_Client
 
         private string Colorize(string input)
         {
-            if (string.IsNullOrEmpty(input) || KeywordColors.Count == 0)
+            if (string.IsNullOrEmpty(input))
                 return input;
 
-            var sb = new StringBuilder(input.Length + 32);
-            int i = 0;
+            List<string> tokens = Tokenize(input);
+            ApplyMultiWordColoring(tokens);
+            ApplySingleWordColoring(tokens);
+            return string.Concat(tokens);
+        }
+        
+        private List<string> Tokenize(string input)
+        {
+            var tokens = new List<string>();
+            var sb = new StringBuilder();
 
-            while (i < input.Length)
+            if (string.IsNullOrEmpty(input))
+                return tokens;
+
+            bool IsWordChar(char c) => char.IsLetterOrDigit(c) || c == '\'';
+            var lastWasWord = IsWordChar(input[0]);
+
+            foreach (var c in input)
             {
-                bool matched = false;
-
-                foreach (var kvp in KeywordColors)
+                var isWordChar = IsWordChar(c);
+                if (isWordChar != lastWasWord)
                 {
-                    var word = kvp.Key;
-                    var color = kvp.Value;
-
-                    if (string.IsNullOrEmpty(word))
-                        continue;
-
-                    if (i + word.Length > input.Length)
-                        continue;
-
-                    if (string.Compare(input, i, word, 0, word.Length, ignoreCase: true, CultureInfo.InvariantCulture) == 0)
-                    {
-                        sb.Append("<color=").Append(color).Append('>');
-                        sb.Append(input, i, word.Length);
-                        sb.Append("</color>");
-
-                        i += word.Length;
-                        matched = true;
-                        break;
-                    }
+                    tokens.Add(sb.ToString());
+                    sb.Clear();
                 }
-
-                if (!matched)
-                {
-                    sb.Append(input[i]);
-                    i++;
-                }
+                sb.Append(c);
+                lastWasWord = isWordChar;
             }
 
-            return sb.ToString();
+            if (sb.Length > 0)
+                tokens.Add(sb.ToString());
+            return tokens;
         }
+        
+        private void ApplySingleWordColoring(List<string> tokens)
+        {
+            var singleKeys = KeywordColors
+                .Where(kvp => !kvp.Key.Contains(" "))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        private const bool LogToFile = true;
+            for (var i = 0; i < tokens.Count; i++)
+            {
+                var token = tokens[i];
+
+                if (!IsWord(token))
+                    continue;
+
+                var lower = token.ToLowerInvariant();
+
+                if (singleKeys.TryGetValue(lower, out var color))
+                {
+                    tokens[i] = $"<color={color}>{token}</color>";
+                }
+            }
+        }
+        
+        private void ApplyMultiWordColoring(List<string> tokens)
+        {
+            var multiKeys = KeywordColors
+                .Where(kvp => kvp.Key.Contains(" "))
+                .Select(kvp => new
+                {
+                    Words = kvp.Key.Split(' '),
+                    Color = kvp.Value
+                })
+                .OrderByDescending(kvp => kvp.Words.Length) 
+                .ToList();
+
+            if (multiKeys.Count == 0 || tokens.Count == 0)
+                return;
+            
+            var wordIndices = new List<int>();
+            for (var i = 0; i < tokens.Count; i++)
+                if (IsWord(tokens[i]))
+                    wordIndices.Add(i);
+            
+            var wi = 0;
+            while (wi < wordIndices.Count)
+            {
+                var matchedAny = false;
+
+                foreach (var key in multiKeys)
+                {
+                    var wordCount = key.Words.Length;
+                    if (wi + wordCount > wordIndices.Count)
+                        continue;
+
+                    var match = true;
+                    for (var k = 0; k < wordCount; k++)
+                    {
+                        var token = tokens[wordIndices[wi + k]];
+                        if (token.Equals(key.Words[k], StringComparison.InvariantCultureIgnoreCase)) 
+                            continue;
+                        match = false;
+                        break;
+                    }
+
+                    if (!match)
+                        continue;
+
+                    var startTokenIndex = wordIndices[wi];
+                    var endTokenIndex = wordIndices[wi + wordCount - 1];
+                    var phraseText = string.Concat(tokens.Skip(startTokenIndex)
+                        .Take(endTokenIndex - startTokenIndex + 1));
+                    tokens[startTokenIndex] = $"<color={key.Color}>{phraseText}</color>";
+                    for (var t = startTokenIndex + 1; t <= endTokenIndex; t++)
+                        tokens[t] = string.Empty;
+                    wi += wordCount;
+                    matchedAny = true;
+                    break;
+                }
+
+                if (!matchedAny)
+                    wi++;
+            }
+        }
+        
+        private bool IsWord(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+                return false;
+            var hasLetterOrDigit = false;
+            for (var i = 0; i < token.Length; i++)
+            {
+                var c = token[i];
+                if (char.IsLetterOrDigit(c))
+                {
+                    hasLetterOrDigit = true;
+                    continue;
+                }
+                if (c != '\'' || i <= 0 || i >= token.Length - 1) 
+                    return false;
+                if (char.IsLetterOrDigit(token[i - 1]) && char.IsLetterOrDigit(token[i + 1]))
+                    continue;
+                return false;
+            }
+            return hasLetterOrDigit;
+        }
 
         public void Log(string text)
         {
@@ -463,10 +564,10 @@ namespace Smushi_AP_Client
 
             _cachedEntries.Enqueue(entry);
 
-            _historyEntries.Add(entry);
+            _historyEntries.Add(new LogEntry(text));
 
             if (_historyPanel != null && _historyPanel.activeSelf)
-                AddHistoryEntryVisual(entry);
+                AddHistoryEntryVisual(new LogEntry(entry.message));
         }
         
         private void ToggleHistory()

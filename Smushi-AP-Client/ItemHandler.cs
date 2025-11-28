@@ -9,8 +9,6 @@ using UnityEngine;
 
 namespace Smushi_AP_Client
 {
-    
-    
     public enum SCHItem
     {
         EnergySpore = 0x1,
@@ -66,7 +64,7 @@ namespace Smushi_AP_Client
     public class ItemHandler : MonoBehaviour
     {
         private Sprite apSprite = LoadSprite();
-        private readonly Queue<(int, ItemInfo)> cachedItems = new();
+        private Queue<(int, ItemInfo)> cachedItems;
         
         private static Sprite LoadSprite()
         {
@@ -100,6 +98,11 @@ namespace Smushi_AP_Client
             pd = manager.pd;
             tpc = manager.tpc;
             return pd != null && inv != null && tpc != null;
+        }
+
+        void Awake()
+        {
+            cachedItems = new Queue<(int, ItemInfo)>();
         }
         
         public void HandleItem(int index, ItemInfo item)
@@ -186,7 +189,7 @@ namespace Smushi_AP_Client
                     inventory.AddItem(leaf);
                     break;
                 case SCHItem.ProgressiveHooks:
-                    if (!movement.hookClimber.enabled)
+                    if (!customPlayerData.HasHooks)
                     {
                         customPlayerData.HasHooks = true;
                         movement.hookEnabled = true;
@@ -306,27 +309,27 @@ namespace Smushi_AP_Client
                     inventory.AddItem(bandAid);
                     break;
                 case SCHItem.RingOfLove:
-                    playerData.rings["diamond"] = true;
+                    playerData.rings.Add("diamond", false);
                     var ringOfLove = Resources.Load<Item>("items/forestheartitems/Ring_Diamond");
                     inventory.AddItem(ringOfLove);
                     break;
                 case SCHItem.RingOfYouth:
-                    playerData.rings["emerald"] = true;
+                    playerData.rings.Add("emerald", false);
                     var ringOfYouth = Resources.Load<Item>("items/forestheartitems/Ring_Emerald");
                     inventory.AddItem(ringOfYouth);
                     break;
                 case SCHItem.RingOfTruth:
-                    playerData.rings["sapphire"] = true;
+                    playerData.rings.Add("sapphire", false);
                     var ringOfTruth = Resources.Load<Item>("items/forestheartitems/Ring_Sapphire");
                     inventory.AddItem(ringOfTruth);
                     break;
                 case SCHItem.RingOfProsperity:
-                    playerData.rings["citrine"] = true;
+                    playerData.rings.Add("citrine", false);
                     var ringOfProsperity = Resources.Load<Item>("items/forestheartitems/Ring_Citrine");
                     inventory.AddItem(ringOfProsperity);
                     break;
                 case SCHItem.RingOfSpirit:
-                    playerData.rings["amethyst"] = true;
+                    playerData.rings.Add("amethyst", false);
                     var ringOfSpirit = Resources.Load<Item>("items/forestheartitems/Ring_Amethyst");
                     inventory.AddItem(ringOfSpirit);
                     break;
@@ -334,8 +337,8 @@ namespace Smushi_AP_Client
                     customPlayerData.HasConch = true;
                     break;
                 case SCHItem.SacredStreamer:
-                    ++playerData.shideCount;
-                    ++playerData.shideCountTotal;
+                    ++customPlayerData.ShideCount;
+                    ++customPlayerData.ShideCountTotal;
                     playerData.forestHeart?.SetHeartState();
                     var shide = Resources.Load<Item>("items/forestheartitems/Shide");
                     inventory.AddItem(shide);

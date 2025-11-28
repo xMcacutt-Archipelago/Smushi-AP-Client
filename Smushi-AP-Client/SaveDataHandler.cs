@@ -25,6 +25,8 @@ namespace Smushi_AP_Client
         public int LotusCount { get; set; }
         public int LotusCountCurrent { get; set; }
         public bool HasFaceThing { get; set; }
+        public int ShideCount { get; set; }
+        public int ShideCountTotal { get; set; }
     }
     
     public class SaveDataHandler : MonoBehaviour
@@ -44,13 +46,22 @@ namespace Smushi_AP_Client
             saveSystem.SetActiveSaveSlot(slotIndex);
             var currentSceneExists = saveSystem._slots[slotIndex].KeyExists("currentScene");
             var sceneIsBad = false;
+            var sceneIsReallyBad = false;
             if (currentSceneExists)
             {
                 var scene = saveSystem._slots[slotIndex].Load<string>("currentScene");
-                if (scene.Equals("home", StringComparison.InvariantCultureIgnoreCase))
+                if (scene.Equals("Home", StringComparison.InvariantCultureIgnoreCase))
                     sceneIsBad = true;
                 if (scene.StartsWith("Zone 0"))
                     sceneIsBad = true;
+                if (scene.StartsWith("Zone3 Cave"))
+                    sceneIsReallyBad = true;
+            }
+
+            if (sceneIsReallyBad)
+            {
+                SaveSystem.Get().Save("currentScene", "Zone 3");
+                SaveSystem.Get().Save("playerPosition", new Vector3(496.272f, 30.11f, 2778.31f));
             }
             if (sceneIsBad || !currentSceneExists)
             {
@@ -91,6 +102,8 @@ namespace Smushi_AP_Client
                     __instance._slots[slot].Save("lotusCount", PluginMain.SaveDataHandler.CustomPlayerData.LotusCount);
                     __instance._slots[slot].Save("lotusCountCurrent", PluginMain.SaveDataHandler.CustomPlayerData.LotusCountCurrent);
                     __instance._slots[slot].Save("hasFaceThing", PluginMain.SaveDataHandler.CustomPlayerData.HasFaceThing);
+                    __instance._slots[slot].Save("customShideCount", PluginMain.SaveDataHandler.CustomPlayerData.ShideCount);
+                    __instance._slots[slot].Save("customShideCountTotal", PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal);
                 }
                 __instance.SyncCache(slot, ignoreFrequencyRestrictions);
             }
@@ -135,6 +148,12 @@ namespace Smushi_AP_Client
                 if (__instance._slots[slot].KeyExists("hasFaceThing"))
                     PluginMain.SaveDataHandler.CustomPlayerData.HasFaceThing
                         = __instance._slots[slot].Load<bool>("hasFaceThing");
+                if (__instance._slots[slot].KeyExists("customShideCount"))
+                    PluginMain.SaveDataHandler.CustomPlayerData.ShideCount
+                        = __instance._slots[slot].Load<int>("customShideCount");
+                if (__instance._slots[slot].KeyExists("customShideCountTotal"))
+                    PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal
+                        = __instance._slots[slot].Load<int>("customShideCountTotal");
                 manager.tpc.gliderEnabled = PluginMain.SaveDataHandler.CustomPlayerData.HasLeaf;
                 manager.tpc.hookClimber.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
                 manager.pd.hasHexkey = PluginMain.SaveDataHandler.CustomPlayerData.HasHexKey;

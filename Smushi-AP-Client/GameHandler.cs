@@ -4,6 +4,7 @@ using Archipelago.MultiClient.Net.Models;
 using FMODUnity;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -39,16 +40,17 @@ namespace Smushi_AP_Client
                 return;
             SaveSystem._instance.SaveAllData(manager, true);
         }
-
+        
         [HarmonyPatch(typeof(HomeLevelSetup))]
         public class HomeLevelSetup_Patch
         {
             [HarmonyPatch("SetHomeOutro")]
             [HarmonyPostfix]
-            public static void OnSetHomeOutro()
+            public static void OnSetHomeOutro(HomeLevelSetup __instance)
             {
                 if (PluginMain.ArchipelagoHandler.SlotData.Goal == Goal.SmushiGoHome)
                     PluginMain.ArchipelagoHandler.Release();
+                __instance.pd.hasBeatGame = false;
             }
         }
 
@@ -95,6 +97,8 @@ namespace Smushi_AP_Client
                 manager.capyRotation.rotation = manager.targetPositions[index].rotation;
             }
         }
+        
+        
         
         // Capybara Hell Sandcastle
         [HarmonyPatch(typeof(IslandDialogueTrigger))]
@@ -171,6 +175,21 @@ namespace Smushi_AP_Client
                 }
                 __instance.capySiblingDTB.TriggerDialogueAnim("build");
                 __instance.mountingTrigger.displayUI = true;
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(IslandDockingZone))]
+        public class IslandDockingZone_Patch
+        {
+            [HarmonyPatch("OnTriggerEnter")]
+            [HarmonyPrefix]
+            public static bool OnTriggerEnter(IslandDockingZone __instance, Collider other)
+            {
+                if (!other.CompareTag("capy") || !__instance.capyActivator.isActivated)
+                    return false;
+                __instance.capyActivator.currentIslandIndex = __instance.islandIndex;
+                __instance.capyActivator.EnableUnmounting();
                 return false;
             }
         }
@@ -386,6 +405,9 @@ namespace Smushi_AP_Client
                         case "Home":
                             button.gameObject.SetActive(PluginMain.SaveDataHandler.CustomPlayerData.HasGoneHome);
                             break;
+                        case "Level 1":
+                            EventSystem.current.SetSelectedGameObject(button.gameObject);
+                            break;
                         case "Level 2":
                             button.gameObject.SetActive(PluginMain.SaveDataHandler.CustomPlayerData.HasGoneFall);
                             break;
@@ -410,6 +432,15 @@ namespace Smushi_AP_Client
                 if (!PluginMain.SaveDataHandler.CustomPlayerData.HasFaceThing)
                     return;
                 __instance.transform.Find("ModelRoot/shroom player/Armature/Hip/LowerSpine/UpperSpine/Head/mustache").gameObject.SetActive(true);
+            }
+            
+            [HarmonyPatch("AddRockCount")]
+            [HarmonyPrefix]
+            public static bool AddRockCount(PlayerData __instance)
+            {
+                __instance.rockCount += 2;
+                __instance.achievements.UpdateCrystalCount();
+                return false;
             }
         }
 
@@ -438,6 +469,125 @@ namespace Smushi_AP_Client
             {
                 __instance.tpc.gliderEnabled = PluginMain.SaveDataHandler.CustomPlayerData.HasLeaf;
                 __instance.hook.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
+            }
+        }
+
+        [HarmonyPatch(typeof(ElderInteractionZone5))]
+        public class ElderInteractionZone5_Patch
+        {
+            [HarmonyPatch("GiveShide")]
+            [HarmonyPrefix]
+            public static bool OnGiveShide(ElderInteractionZone5 __instance)
+            {
+                __instance.StartCoroutine(GiveShideCo(__instance));
+                return false;
+            }
+
+            private static IEnumerator GiveShideCo(ElderInteractionZone5 __instance)
+            {
+                __instance.ikTrigger.RemoveAimTarget();
+                __instance.camSwitcher.SwitchBetweenTwoCameras(__instance.npcCam, __instance.cam);
+                yield return new WaitForSeconds(1f);
+                __instance.elderAnim.SetTrigger("ShideSummon");
+                yield return new WaitForSeconds(0.7f);
+                RuntimeManager.PlayOneShot(__instance.sparkleSFX);
+                for (; PluginMain.SaveDataHandler.CustomPlayerData.ShideCount > 0; --PluginMain.SaveDataHandler.CustomPlayerData.ShideCount)
+                {
+                    __instance.shideModels[PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal - PluginMain.SaveDataHandler.CustomPlayerData.ShideCount].SetActive(true);
+                    __instance.ps[PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal - PluginMain.SaveDataHandler.CustomPlayerData.ShideCount].Play();
+                    __instance.inv.RemoveItem(__instance.shideItem);
+                }
+
+                var given = PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal -
+                            PluginMain.SaveDataHandler.CustomPlayerData.ShideCount;
+                if (given == 4)
+                {
+                    yield return (object) new WaitForSeconds(1.5f);
+                    __instance.camShake.ShakeCamera(2f, 5f);
+                    RuntimeManager.PlayOneShot(__instance.leavesSFX);
+                    __instance.leafPS.Play();
+                    yield return new WaitForSeconds(1.5f);
+                    __instance.barrierAnim.enabled = true;
+                    RuntimeManager.PlayOneShot(__instance.barrierSFX);
+                    __instance.rootPS.Play();
+                    yield return new WaitForSeconds(3f);
+                    __instance.camSwitcher.SwitchBetweenTwoCameras(__instance.cam, __instance.npcCam);
+                    __instance.dialogue.StartDialogue("ShideGiven4");
+                }
+                else
+                {
+                    yield return new WaitForSeconds(1f);
+                    __instance.camSwitcher.SwitchBetweenTwoCameras(__instance.cam, __instance.npcCam);
+                    yield return new WaitForSeconds(1f);
+                    __instance.ShideDialogueChecker();
+                    __instance.ikTrigger.SetAimTarget();
+                }
+            }
+            
+            [HarmonyPatch("Start")]
+            [HarmonyPrefix]
+            private static bool Start(ElderInteractionZone5 __instance)
+            {
+                var given = PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal -
+                            PluginMain.SaveDataHandler.CustomPlayerData.ShideCount;
+                for (var index = 0; index < given; ++index)
+                    __instance.shideModels[index].SetActive(true);
+                return false;
+            }
+            
+            [HarmonyPatch("ShideDialogueChecker")]
+            [HarmonyPrefix]
+            public static bool ShideDialogueChecker(ElderInteractionZone5 __instance)
+            {
+                var given = PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal -
+                            PluginMain.SaveDataHandler.CustomPlayerData.ShideCount;
+                switch (given)
+                {
+                    case 1:
+                        __instance.dialogue.StartDialogue("ShideGiven1");
+                        break;
+                    case 2:
+                        __instance.dialogue.StartDialogue("ShideGiven2");
+                        break;
+                    case 3:
+                        __instance.dialogue.StartDialogue("ShideGiven3");
+                        break;
+                }
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(RingTradeInteraction))]
+        public class RingTradeInteraction_Patch
+        {
+            [HarmonyPatch("AddRing")]
+            [HarmonyPrefix]
+            public static bool AddRing(string ringType)
+            { 
+                return false;
+            } 
+        }
+        
+        [HarmonyPatch(typeof(PlayerDialogue))]
+        public class PlayerDialogue_Patch
+        {
+            [HarmonyPatch("ResetDialogue")]
+            [HarmonyPrefix]
+            public static bool ResetDialogue(PlayerDialogue __instance)
+            {
+                __instance.StartCoroutine(DelayedEnd(__instance));
+                Debug.Log("Dialogue reset");
+                return false;
+            }
+
+            private static IEnumerator DelayedEnd(PlayerDialogue __instance)
+            {
+                yield return new WaitForSeconds(0.3f);
+                __instance.pauser.ResumePlayer();
+                if (!__instance.tpc.IsHookEnabled())
+                    __instance.tpc.SetHookComponent(true);
+                if (!__instance.tpc.gliderEnabled)
+                    __instance.tpc.gliderEnabled = PluginMain.SaveDataHandler.CustomPlayerData.HasLeaf;
             }
         }
     }
