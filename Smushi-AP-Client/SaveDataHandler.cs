@@ -102,8 +102,6 @@ namespace Smushi_AP_Client
                     __instance._slots[slot].Save("lotusCount", PluginMain.SaveDataHandler.CustomPlayerData.LotusCount);
                     __instance._slots[slot].Save("lotusCountCurrent", PluginMain.SaveDataHandler.CustomPlayerData.LotusCountCurrent);
                     __instance._slots[slot].Save("hasFaceThing", PluginMain.SaveDataHandler.CustomPlayerData.HasFaceThing);
-                    __instance._slots[slot].Save("customShideCount", PluginMain.SaveDataHandler.CustomPlayerData.ShideCount);
-                    __instance._slots[slot].Save("customShideCountTotal", PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal);
                 }
                 __instance.SyncCache(slot, ignoreFrequencyRestrictions);
             }
@@ -148,12 +146,6 @@ namespace Smushi_AP_Client
                 if (__instance._slots[slot].KeyExists("hasFaceThing"))
                     PluginMain.SaveDataHandler.CustomPlayerData.HasFaceThing
                         = __instance._slots[slot].Load<bool>("hasFaceThing");
-                if (__instance._slots[slot].KeyExists("customShideCount"))
-                    PluginMain.SaveDataHandler.CustomPlayerData.ShideCount
-                        = __instance._slots[slot].Load<int>("customShideCount");
-                if (__instance._slots[slot].KeyExists("customShideCountTotal"))
-                    PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal
-                        = __instance._slots[slot].Load<int>("customShideCountTotal");
                 manager.tpc.gliderEnabled = PluginMain.SaveDataHandler.CustomPlayerData.HasLeaf;
                 manager.tpc.hookClimber.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
                 manager.pd.hasHexkey = PluginMain.SaveDataHandler.CustomPlayerData.HasHexKey;

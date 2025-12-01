@@ -337,8 +337,10 @@ namespace Smushi_AP_Client
                     customPlayerData.HasConch = true;
                     break;
                 case SCHItem.SacredStreamer:
-                    ++customPlayerData.ShideCount;
-                    ++customPlayerData.ShideCountTotal;
+                    if (playerData.shideCountTotal >= 4)
+                        break;
+                    ++playerData.shideCount;
+                    ++playerData.shideCountTotal;
                     playerData.forestHeart?.SetHeartState();
                     var shide = Resources.Load<Item>("items/forestheartitems/Shide");
                     inventory.AddItem(shide);

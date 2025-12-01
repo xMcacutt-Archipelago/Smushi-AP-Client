@@ -26,7 +26,21 @@ namespace Smushi_AP_Client
                     PluginMain.SaveDataHandler.CustomPlayerData.HasGoneFall = true;
                     break;
                 case "Zone 3":
+                    var transitionsZ3 = FindObjectsOfType<LevelTransition>();
+                    foreach (var transition in transitionsZ3)
+                    {
+                        if (transition.SceneName == "Zone3 Cave")
+                            transition.isCave = true;
+                    }
                     PluginMain.SaveDataHandler.CustomPlayerData.HasGoneLake = true;
+                    break;
+                case "Zone 4":
+                    var transitionsZ4 = FindObjectsOfType<LevelTransition>();
+                    foreach (var transition in transitionsZ4)
+                    {
+                        if (transition.SceneName == "Zone4 Cave")
+                            transition.isCave = true;
+                    }
                     break;
                 case "Zone 5":
                     PluginMain.SaveDataHandler.CustomPlayerData.HasGoneGrove = true;
@@ -57,10 +71,40 @@ namespace Smushi_AP_Client
         [HarmonyPatch(typeof(ForestHeartCutscene))]
         public class ForestHeartCutscene_Patch
         {
-            [HarmonyPatch("SetCutsceneEnd")]
-            [HarmonyPostfix]
-            public static void OnSetCutsceneEnd()
+            [HarmonyPatch("StartCutscene")]
+            [HarmonyPrefix]
+            public static bool StartCutscene(ForestHeartCutscene __instance)
             {
+                __instance.StartCoroutine(SkipCutsceneSpeedrunner(__instance));
+                return false;
+            }
+
+            public static IEnumerator SkipCutsceneSpeedrunner(ForestHeartCutscene __instance)
+            {
+                __instance.fade.FadeIn();
+                yield return (object) new WaitForSeconds(2f);
+                __instance.aug.SetActive(true);
+                __instance.myceliumPostgame.SetActive(true);
+                __instance.rosieAnim.SetBool("idleChange", true);
+                __instance.heartAnim.Play("HealIdle");
+                __instance.heartMat.color = __instance.heartColors[5];
+                foreach (GameObject heartEffect in __instance.heartEffects)
+                    heartEffect.SetActive(true);
+                __instance.ogElderNPC.SetActive(false);
+                __instance.elderNPCs.SetActive(true);
+                __instance.elderCutsceneModel.SetActive(false);
+                __instance.playerCutsceneMode.SetActive(false);
+                __instance.zone4Elder.SetActive(false);
+                __instance.pd.solvedPuzzles.Add("forestHeartDone", false);
+                __instance.player.position = __instance.playerPosTarget.position;
+                __instance.playerModel.SetActive(true);
+                __instance.fade.FadeOut();
+                __instance.pd.dialogBools["heartHealed"] = true;
+                yield return new WaitForSeconds(1f);
+                __instance.dtb.ResetDialogue();
+                __instance.dialogueControls.SetActive(true);
+                __instance.rosieAnim.SetBool("idleChange", true);
+                __instance.achievementHandler.UnlockAchievement("forestHeart", 24);
                 if (PluginMain.ArchipelagoHandler.SlotData.Goal == Goal.SmushiSaveTree)
                     PluginMain.ArchipelagoHandler.Release();
             }
@@ -306,7 +350,7 @@ namespace Smushi_AP_Client
                         Destroy(transform.gameObject);
                 }
 
-                if (PluginMain.SaveDataHandler.CustomPlayerData.HasConch && __instance.pd.currentSceneName != "Zone 3")
+                if (PluginMain.SaveDataHandler.CustomPlayerData.HasConch)
                 {
                     GameObject gameObject = Instantiate<GameObject>(__instance.conchButton, __instance.ItemContent);
                     gameObject.transform.Find("ItemIcon").GetComponent<Image>();
@@ -434,6 +478,10 @@ namespace Smushi_AP_Client
                 __instance.transform.Find("ModelRoot/shroom player/Armature/Hip/LowerSpine/UpperSpine/Head/mustache").gameObject.SetActive(true);
             }
             
+            [HarmonyPatch("Awake")]
+            [HarmonyPrefix]
+            public static bool AddShide(PlayerData __instance) { return false; }
+            
             [HarmonyPatch("AddRockCount")]
             [HarmonyPrefix]
             public static bool AddRockCount(PlayerData __instance)
@@ -472,86 +520,40 @@ namespace Smushi_AP_Client
             }
         }
 
-        [HarmonyPatch(typeof(ElderInteractionZone5))]
-        public class ElderInteractionZone5_Patch
+        [HarmonyPatch(typeof(WaterShrine))]
+        public class WaterShrine_Patch
         {
-            [HarmonyPatch("GiveShide")]
-            [HarmonyPrefix]
-            public static bool OnGiveShide(ElderInteractionZone5 __instance)
-            {
-                __instance.StartCoroutine(GiveShideCo(__instance));
-                return false;
-            }
-
-            private static IEnumerator GiveShideCo(ElderInteractionZone5 __instance)
-            {
-                __instance.ikTrigger.RemoveAimTarget();
-                __instance.camSwitcher.SwitchBetweenTwoCameras(__instance.npcCam, __instance.cam);
-                yield return new WaitForSeconds(1f);
-                __instance.elderAnim.SetTrigger("ShideSummon");
-                yield return new WaitForSeconds(0.7f);
-                RuntimeManager.PlayOneShot(__instance.sparkleSFX);
-                for (; PluginMain.SaveDataHandler.CustomPlayerData.ShideCount > 0; --PluginMain.SaveDataHandler.CustomPlayerData.ShideCount)
-                {
-                    __instance.shideModels[PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal - PluginMain.SaveDataHandler.CustomPlayerData.ShideCount].SetActive(true);
-                    __instance.ps[PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal - PluginMain.SaveDataHandler.CustomPlayerData.ShideCount].Play();
-                    __instance.inv.RemoveItem(__instance.shideItem);
-                }
-
-                var given = PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal -
-                            PluginMain.SaveDataHandler.CustomPlayerData.ShideCount;
-                if (given == 4)
-                {
-                    yield return (object) new WaitForSeconds(1.5f);
-                    __instance.camShake.ShakeCamera(2f, 5f);
-                    RuntimeManager.PlayOneShot(__instance.leavesSFX);
-                    __instance.leafPS.Play();
-                    yield return new WaitForSeconds(1.5f);
-                    __instance.barrierAnim.enabled = true;
-                    RuntimeManager.PlayOneShot(__instance.barrierSFX);
-                    __instance.rootPS.Play();
-                    yield return new WaitForSeconds(3f);
-                    __instance.camSwitcher.SwitchBetweenTwoCameras(__instance.cam, __instance.npcCam);
-                    __instance.dialogue.StartDialogue("ShideGiven4");
-                }
-                else
-                {
-                    yield return new WaitForSeconds(1f);
-                    __instance.camSwitcher.SwitchBetweenTwoCameras(__instance.cam, __instance.npcCam);
-                    yield return new WaitForSeconds(1f);
-                    __instance.ShideDialogueChecker();
-                    __instance.ikTrigger.SetAimTarget();
-                }
-            }
             
-            [HarmonyPatch("Start")]
+            [HarmonyPatch("OnTriggerStay")]
             [HarmonyPrefix]
-            private static bool Start(ElderInteractionZone5 __instance)
+            private static bool OnTriggerStay(WaterShrine __instance, Collider other)
             {
-                var given = PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal -
-                            PluginMain.SaveDataHandler.CustomPlayerData.ShideCount;
-                for (var index = 0; index < given; ++index)
-                    __instance.shideModels[index].SetActive(true);
-                return false;
-            }
-            
-            [HarmonyPatch("ShideDialogueChecker")]
-            [HarmonyPrefix]
-            public static bool ShideDialogueChecker(ElderInteractionZone5 __instance)
-            {
-                var given = PluginMain.SaveDataHandler.CustomPlayerData.ShideCountTotal -
-                            PluginMain.SaveDataHandler.CustomPlayerData.ShideCount;
-                switch (given)
+                if ((__instance.playerLayer.value & (1 << other.gameObject.layer)) <= 0)
                 {
-                    case 1:
-                        __instance.dialogue.StartDialogue("ShideGiven1");
-                        break;
-                    case 2:
-                        __instance.dialogue.StartDialogue("ShideGiven2");
-                        break;
-                    case 3:
-                        __instance.dialogue.StartDialogue("ShideGiven3");
-                        break;
+                    return false;
+                }
+                if (!__instance.UIPoppedUp && __instance.playerNearby)
+                {
+                    __instance.UIPoppedUp = true;
+                    __instance.SetDialoguePopup(status: true);
+                }
+                if (__instance.tpcControls.IsNPCInteractPressed())
+                {
+                    if (__instance.pd.hasWaterEssence && __instance.isSolved)
+                    {
+                        __instance.isSolved = true;
+                        __instance.ActivateWaterShrine();
+                    }
+                    else if (__instance.isHoldingShell && !__instance.isSolved)
+                    {
+                        __instance.pickupController.PlaceItem();
+                        __instance.shellModel.SetActive(value: true);
+                        __instance.isSolved = true;
+                    }
+                    else
+                    {
+                        __instance.StartCoroutine(__instance.RunHintDialogue());
+                    }
                 }
                 return false;
             }

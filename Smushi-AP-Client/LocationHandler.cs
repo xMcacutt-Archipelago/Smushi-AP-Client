@@ -308,9 +308,8 @@ namespace Smushi_AP_Client
         // Explosive Powder 2 Found  
         // Container of Light Found 
         // Secret Opener Found         
-        // Sacred Streamer 1 Obtained  
-        // Sacred Streamer 3 Obtained
-        // Sacred Streamer 4 Obtained  
+        // Sacred Streamer 2 Obtained
+        // Sacred Streamer 3 Obtained  
         [HarmonyPatch(typeof(ItemPickupGeneric))]
         public class ItemPickupGeneric_Patch
         {
@@ -329,8 +328,8 @@ namespace Smushi_AP_Client
                 { "cavePowder", 0x304 },
                 { "lightbulb", 0x30C },
                 { "secretKey", 0x407 },
-                { "statueShide", 0x50A },
-                { "underwaterShide", 0x50B },
+                { "statueShide", 0x509 },
+                { "underwaterShide", 0x50A },
                 { "hasPencil", 0x20D }
             };
             
@@ -680,6 +679,18 @@ namespace Smushi_AP_Client
                 return false;
             }
         }
+
+        [HarmonyPatch(typeof(CoinNPCBehavior))]
+        public class CoinNPCBehavior_Patch
+        {
+            [HarmonyPatch("CheckCoins")]
+            [HarmonyPostfix]
+            public static void CheckCoins(CoinNPCBehavior __instance, bool __result)
+            {
+                if (__result)
+                    PluginMain.ArchipelagoHandler.CheckLocation(0x20E);
+            }
+        }
         
         // Sacred Streamer 1 Obtained  
         [HarmonyPatch(typeof(RicoInteraction))]
@@ -696,9 +707,33 @@ namespace Smushi_AP_Client
                 __instance.dialogue.StartNodeName = "RicoPost";
                 return false;
             }
+            
+            [HarmonyPatch("Start")]
+            [HarmonyPrefix]
+            public static bool Start(RicoInteraction __instance)
+            {
+                if (__instance.isZone0)
+                {
+                    __instance.gameObject.SetActive(true);
+                    return false;
+                }
+                __instance.dialogue.StartNodeName = "RicoPost";
+                return false;
+            }
+            
+            [HarmonyPatch("GiveSuperSpore")]
+            [HarmonyPrefix]
+            public static bool GiveSuperSpore(RicoInteraction __instance)
+            { 
+                __instance.objectUI.SetText(__instance.superSpore);
+                __instance.objectUI.SetUI(true, 2);
+                PluginMain.ArchipelagoHandler.CheckLocation(0x402);
+                __instance.StartCoroutine(__instance.ContinueDialogue2());
+                return false;
+            }
         }
         
-        // Sacred Streamer 2 Obtained  
+        // Sacred Streamer 4 Obtained  
         [HarmonyPatch(typeof(RingTradeInteraction))]
         public class RingTradeInteraction_Patch
         {
@@ -710,7 +745,7 @@ namespace Smushi_AP_Client
                     return false;
                 if (__instance.pd.ringCount == 3)
                 {
-                    PluginMain.ArchipelagoHandler.CheckLocation(0x509);
+                    PluginMain.ArchipelagoHandler.CheckLocation(0x50B);
                     __instance.objectUI.SetText(__instance.shideItem);
                     __instance.objectUI.SetUI(isOpening: true, 7);
                     __instance.StartCoroutine(__instance.ContinueDialogue());
@@ -754,6 +789,21 @@ namespace Smushi_AP_Client
                 __instance.objectUI.SetTextAugmenter(__instance.augmenter);
                 __instance.objectUI.SetUI(true, 11);
                 __instance.StartCoroutine(__instance.ContinueDialogue2());
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(ShimuHandler))]
+        public class ShimuHandler_Patch
+        {
+            [HarmonyPatch("GiveConch")]
+            [HarmonyPrefix]
+            public static bool GiveConch(ShimuHandler __instance)
+            {
+                PluginMain.ArchipelagoHandler.CheckLocation(0x103);
+                __instance.objectUI.SetText(__instance.item);
+                __instance.objectUI.SetUI(isOpening: true, 0);
+                __instance.StartCoroutine(__instance.ContinueDialogue());
                 return false;
             }
         }
@@ -818,6 +868,8 @@ namespace Smushi_AP_Client
                 __instance.uiFade.FadeOut();
                 yield return new WaitForSeconds(0.5f);
                 __instance.hook.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
+                __instance.miner.canMine = PluginMain.SaveDataHandler.CustomPlayerData.HasHexKey;
+                __instance.pd.hasHexkey = PluginMain.SaveDataHandler.CustomPlayerData.HasHexKey;
                 if (__instance.rockCount == 2)
                 {
                     __instance.dtb.StartDialogue("DiverEndSuccess");

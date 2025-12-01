@@ -132,10 +132,11 @@ namespace Smushi_AP_Client
         private readonly List<LogEntry> _historyEntries = [];
         private GameObject _historyPanel;
         private RectTransform _historyContent;
-        private bool _showHistory = false;
+        private bool _showHistory;
         private ScrollRect _historyScrollRect;
         private RectTransform _historyViewport;
-
+        private bool _rebuildHistoryDirty;
+        private int _historyBuiltCount;
 
         private Transform _messageParent;
 
@@ -156,6 +157,12 @@ namespace Smushi_AP_Client
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
+            }
+            
+            if (_showHistory && _rebuildHistoryDirty)
+            {
+                _rebuildHistoryDirty = false;
+                RebuildHistory();
             }
         }
 
@@ -312,7 +319,7 @@ namespace Smushi_AP_Client
             text.color = Color.white;
             bg.color   = new Color(0, 0, 0, 0.8f);
 
-            text.text = Colorize(entry.message);
+            text.text = entry.colorizedMessage;
 
             Canvas.ForceUpdateCanvases();
             LayoutRebuilder.ForceRebuildLayoutImmediate(text.rectTransform);
@@ -355,7 +362,7 @@ namespace Smushi_AP_Client
 
         private void UpdateEntryVisual(LogEntry entry)
         {
-            entry.text.text = Colorize(entry.message);
+            entry.text.text = entry.colorizedMessage;
 
             var bgRect = entry.background.rectTransform;
             var textHeight = entry.text.preferredHeight;
@@ -412,6 +419,8 @@ namespace Smushi_AP_Client
 
             _textPool.Enqueue(entry.text);
             _backgroundPool.Enqueue(entry.background);
+            entry.text = null;
+            entry.background = null;
         }
 
         private string Colorize(string input)
@@ -561,13 +570,25 @@ namespace Smushi_AP_Client
         public void Log(string text)
         {
             var entry = new LogEntry(text);
+            entry.colorizedMessage = Colorize(text);
+
+            if (_showHistory)
+            {
+                _historyEntries.Add(new LogEntry(text)
+                {
+                    colorizedMessage = entry.colorizedMessage
+                });
+
+                _rebuildHistoryDirty = true;
+                return;
+            }
 
             _cachedEntries.Enqueue(entry);
 
-            _historyEntries.Add(new LogEntry(text));
-
-            if (_historyPanel != null && _historyPanel.activeSelf)
-                AddHistoryEntryVisual(new LogEntry(entry.message));
+            _historyEntries.Add(new LogEntry(text)
+            {
+                colorizedMessage = entry.colorizedMessage
+            });
         }
         
         private void ToggleHistory()
@@ -587,6 +608,8 @@ namespace Smushi_AP_Client
 
                     _textPool.Enqueue(e.text);
                     _backgroundPool.Enqueue(e.background);
+                    e.text = null;
+                    e.background = null;
                 }
 
                 _visibleEntries.Clear();
@@ -596,7 +619,7 @@ namespace Smushi_AP_Client
             }
             else
             {
-                Cursor.lockState = CursorLockMode.None;
+                Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 _messageParent.gameObject.SetActive(_showConsole);
             }
@@ -706,20 +729,20 @@ namespace Smushi_AP_Client
             _historyScrollRect.content = contentRect;
             _historyContent = contentRect;
         }
-        
+
         private void RebuildHistory()
         {
-            if (_historyContent == null)
-                return;
-            for (var i = _historyContent.childCount - 1; i >= 0; i--)
-                Destroy(_historyContent.GetChild(i).gameObject);
-            foreach (var entry in _historyEntries)
-                AddHistoryEntryVisual(entry);
-            
+            if (_historyContent == null) return;
+
+            for (int i = _historyBuiltCount; i < _historyEntries.Count; i++)
+                AddHistoryEntryVisual(_historyEntries[i]);
+
+            _historyBuiltCount = _historyEntries.Count;
+
             Canvas.ForceUpdateCanvases();
             LayoutRebuilder.ForceRebuildLayoutImmediate(_historyContent);
             Canvas.ForceUpdateCanvases();
-            _historyScrollRect.verticalNormalizedPosition = 0f;
+            _historyScrollRect.verticalNormalizedPosition = 0f; 
         }
 
         [Serializable]
@@ -743,6 +766,7 @@ namespace Smushi_AP_Client
             public Image background;
 
             public string message;
+            public string colorizedMessage;
             public float height = MessageHeight;
 
             public LogEntry(string msg)
