@@ -2,6 +2,10 @@
 
 ---
 
+## v1.0.4
+- Fix accidental save data break on player data awake
+- Add advanced logic
+
 ## v1.0.3
 - Clavaria Augmenter logically requires mine
 - Clavaria Augmenter not sending check

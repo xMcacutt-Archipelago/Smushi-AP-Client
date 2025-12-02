@@ -63,23 +63,7 @@ namespace Smushi_AP_Client
     
     public class ItemHandler : MonoBehaviour
     {
-        private Sprite apSprite = LoadSprite();
         private Queue<(int, ItemInfo)> cachedItems;
-        
-        private static Sprite LoadSprite()
-        {
-            var dllDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var logoPath = Path.Combine(dllDir, "APLogo.png");
-            var data = File.ReadAllBytes(logoPath);
-            var tex = new Texture2D(2, 2);
-            tex.LoadImage(data);
-            return Sprite.Create(
-                tex,
-                new Rect(0, 0, tex.width, tex.height),
-                new Vector2(0.5f, 0.5f),
-                100f
-            );
-        }
 
         private bool TryGetHandlers(
             out SaveLoadManager manager, 

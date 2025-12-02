@@ -25,8 +25,6 @@ namespace Smushi_AP_Client
         public int LotusCount { get; set; }
         public int LotusCountCurrent { get; set; }
         public bool HasFaceThing { get; set; }
-        public int ShideCount { get; set; }
-        public int ShideCountTotal { get; set; }
     }
     
     public class SaveDataHandler : MonoBehaviour

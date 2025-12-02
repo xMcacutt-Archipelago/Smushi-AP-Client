@@ -478,7 +478,7 @@ namespace Smushi_AP_Client
                 __instance.transform.Find("ModelRoot/shroom player/Armature/Hip/LowerSpine/UpperSpine/Head/mustache").gameObject.SetActive(true);
             }
             
-            [HarmonyPatch("Awake")]
+            [HarmonyPatch("AddShide")]
             [HarmonyPrefix]
             public static bool AddShide(PlayerData __instance) { return false; }
             
