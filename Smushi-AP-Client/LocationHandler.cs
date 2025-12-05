@@ -163,13 +163,14 @@ namespace Smushi_AP_Client
         public class OnionDialogue_Patch
         {
             [HarmonyPatch("TradeBerry")]
-            [HarmonyPostfix]
-            public static void OnTradeBerry(OnionDialogue __instance)
+            [HarmonyPrefix]
+            public static bool OnTradeBerry(OnionDialogue __instance)
             {
                 PluginMain.ArchipelagoHandler.CheckLocation(0x703);
                 __instance.objectUI.SetTextAugmenter(__instance.augmenter);
                 __instance.objectUI.SetUI(true, 10);
                 __instance.StartCoroutine(__instance.ContinueDialogue());
+                return false;
             }
         }
 
@@ -343,6 +344,11 @@ namespace Smushi_AP_Client
                 __instance.SetDialoguePopup(false);
                 // TODO Set bool somewhere for check completed
                 PluginMain.ArchipelagoHandler.CheckLocation(_genericIds[__instance.dialogeBoolName]);
+                if (__instance.dialogeBoolName == "hasPencil")
+                {
+                    PluginMain.SaveDataHandler.CustomPlayerData.HasPencil = true;
+                    PluginMain.SaveDataHandler.SaveGame();
+                }
                 __instance.model.SetActive(false);
                 __instance.objectUI.SetText(__instance.item);
                 __instance.objectUI.SetUI(true, __instance.objectIndex);
@@ -713,11 +719,7 @@ namespace Smushi_AP_Client
             public static bool Start(RicoInteraction __instance)
             {
                 if (__instance.isZone0)
-                {
                     __instance.gameObject.SetActive(true);
-                    return false;
-                }
-                __instance.dialogue.StartNodeName = "RicoPost";
                 return false;
             }
             
@@ -727,7 +729,7 @@ namespace Smushi_AP_Client
             { 
                 __instance.objectUI.SetText(__instance.superSpore);
                 __instance.objectUI.SetUI(true, 2);
-                PluginMain.ArchipelagoHandler.CheckLocation(0x402);
+                PluginMain.ArchipelagoHandler.CheckLocation(0x102);
                 __instance.StartCoroutine(__instance.ContinueDialogue2());
                 return false;
             }

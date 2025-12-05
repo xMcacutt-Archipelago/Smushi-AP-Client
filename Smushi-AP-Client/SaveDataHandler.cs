@@ -25,6 +25,10 @@ namespace Smushi_AP_Client
         public int LotusCount { get; set; }
         public int LotusCountCurrent { get; set; }
         public bool HasFaceThing { get; set; }
+        public bool HasFlint { get; set; }
+        public bool HasNeedle { get; set; }
+        public bool HasHeadlamp { get; set; }
+        public bool HasPencil { get; set; }
     }
     
     public class SaveDataHandler : MonoBehaviour
@@ -100,6 +104,10 @@ namespace Smushi_AP_Client
                     __instance._slots[slot].Save("lotusCount", PluginMain.SaveDataHandler.CustomPlayerData.LotusCount);
                     __instance._slots[slot].Save("lotusCountCurrent", PluginMain.SaveDataHandler.CustomPlayerData.LotusCountCurrent);
                     __instance._slots[slot].Save("hasFaceThing", PluginMain.SaveDataHandler.CustomPlayerData.HasFaceThing);
+                    __instance._slots[slot].Save("hasFlint", PluginMain.SaveDataHandler.CustomPlayerData.HasFlint);
+                    __instance._slots[slot].Save("hasNeedle", PluginMain.SaveDataHandler.CustomPlayerData.HasNeedle);
+                    __instance._slots[slot].Save("hasHeadlamp", PluginMain.SaveDataHandler.CustomPlayerData.HasHeadlamp);
+                    __instance._slots[slot].Save("hasPencil", PluginMain.SaveDataHandler.CustomPlayerData.HasPencil);
                 }
                 __instance.SyncCache(slot, ignoreFrequencyRestrictions);
             }
@@ -144,9 +152,24 @@ namespace Smushi_AP_Client
                 if (__instance._slots[slot].KeyExists("hasFaceThing"))
                     PluginMain.SaveDataHandler.CustomPlayerData.HasFaceThing
                         = __instance._slots[slot].Load<bool>("hasFaceThing");
+                if (__instance._slots[slot].KeyExists("hasFlint"))
+                    PluginMain.SaveDataHandler.CustomPlayerData.HasFlint
+                        = __instance._slots[slot].Load<bool>("hasFlint");
+                if (__instance._slots[slot].KeyExists("hasNeedle"))
+                    PluginMain.SaveDataHandler.CustomPlayerData.HasNeedle
+                        = __instance._slots[slot].Load<bool>("hasNeedle");
+                if (__instance._slots[slot].KeyExists("hasHeadlamp"))
+                    PluginMain.SaveDataHandler.CustomPlayerData.HasHeadlamp
+                        = __instance._slots[slot].Load<bool>("hasHeadlamp");
+                if (__instance._slots[slot].KeyExists("hasPencil"))
+                    PluginMain.SaveDataHandler.CustomPlayerData.HasPencil
+                        = __instance._slots[slot].Load<bool>("hasPencil");
                 manager.tpc.gliderEnabled = PluginMain.SaveDataHandler.CustomPlayerData.HasLeaf;
                 manager.tpc.hookClimber.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
                 manager.pd.hasHexkey = PluginMain.SaveDataHandler.CustomPlayerData.HasHexKey;
+                manager.pd.hasFlint = PluginMain.SaveDataHandler.CustomPlayerData.HasFlint;
+                manager.pd.hasNeedle = PluginMain.SaveDataHandler.CustomPlayerData.HasNeedle;
+                manager.pd.hasHeadlamp = PluginMain.SaveDataHandler.CustomPlayerData.HasHeadlamp;
             }
         }
         
@@ -160,6 +183,13 @@ namespace Smushi_AP_Client
                     Directory.CreateDirectory(__result);
                 return false;
             }
+        }
+
+        public void SaveGame()
+        {
+            var manager = FindObjectOfType<SaveLoadManager>();
+            if (manager != null)    
+                SaveSystem._instance.SaveAllData(manager, true);
         }
     }
 }

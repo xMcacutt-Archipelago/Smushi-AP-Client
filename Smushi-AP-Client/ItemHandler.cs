@@ -209,11 +209,12 @@ namespace Smushi_AP_Client
                     break;
                 case SCHItem.BladeOfPower:
                     playerData.hasNeedle = true;
+                    customPlayerData.HasNeedle = true;
                     var needle = Resources.Load<Item>("items/Needle");
                     inventory.AddItem(needle);
                     break;
                 case SCHItem.AncientRelic:
-                    if (playerData.dialogBools["coin1"])
+                    if (!playerData.dialogBools["coin1"])
                     {
                         playerData.dialogBools["coin1"] = true;
                         var relic1 = Resources.Load<Item>("items/Relic1");
@@ -235,7 +236,8 @@ namespace Smushi_AP_Client
                     playerData.hasJournal = true;
                     break;
                 case SCHItem.FirestarterKit:
-                    playerData.hasFlint = true;
+                    playerData.hasFlint = true;                    
+                    customPlayerData.HasFlint = true;
                     var firestarter = Resources.Load<Item>("items/FlintSteel");
                     inventory.AddItem(firestarter);
                     break;
@@ -245,6 +247,7 @@ namespace Smushi_AP_Client
                     inventory.AddItem(password);
                     break;
                 case SCHItem.ExplosivePowder:
+                    ItemPreventionHandler.AllowPowder = true;
                     playerData.AddPowderCount();
                     var powder = Resources.Load<Item>("items/ExplosivePowder");
                     inventory.AddItem(powder);
@@ -256,6 +259,7 @@ namespace Smushi_AP_Client
                     break;
                 case SCHItem.Headlamp:
                     playerData.hasHeadlamp = true;
+                    customPlayerData.HasHeadlamp = true;
                     var headlamp = Resources.Load<Item>("items/Headlamp");
                     inventory.AddItem(headlamp);
                     break;

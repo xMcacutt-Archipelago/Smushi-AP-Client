@@ -7,7 +7,7 @@ For the APWorld for Smushi see [Smushi APWorld](https://github.com/xMcacutt-Arch
 
 #### Mod Manager - RECOMMENDED ONCE OPERATIONAL
 
-If you are reading this on Thunderstore, great! Simply download the [Thunderstore Mod Manager](https://thunderstore.io/), follow the instructions to set up Smushi Come Home and install the [Archipelago client mod](https://thunderstore.io/c/smushicomehome/p/xMcacutt/Smushi_Archipelago/).
+If you are reading this on Thunderstore, great! Simply download the [Thunderstore Mod Manager](https://thunderstore.io/), follow the instructions to set up Smushi Come Home and install the [Archipelago client mod](https://thunderstore.io/c/smushi-come-home/p/xMcacutt/Smushi_Archipelago/).
 This is the recommended installation method but manual installation is also possible and described below.
 
 #### Manual Installation

@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace Smushi_AP_Client
 {
@@ -20,26 +19,36 @@ namespace Smushi_AP_Client
 
         public void SceneChanged(Scene scene, LoadSceneMode loadSceneMode)
         {
+            PlayerDialogue playerDialogue;
             switch (scene.name)
             {
+                case "Zone 0":
+                    APConsole.Instance.Log("Tools of the Explorer location inaccessible. Checking location automatically to avoid a softlock.");
+                    if (PluginMain.SaveDataHandler.CustomPlayerData.HasGoneHome)
+                        PluginMain.ArchipelagoHandler.CheckLocation(0x100);
+                    break;
                 case "Zone 2_F":
                     PluginMain.SaveDataHandler.CustomPlayerData.HasGoneFall = true;
                     break;
                 case "Zone 3":
                     var transitionsZ3 = FindObjectsOfType<LevelTransition>();
+                    playerDialogue = FindObjectOfType<PlayerDialogue>();
                     foreach (var transition in transitionsZ3)
                     {
                         if (transition.SceneName == "Zone3 Cave")
                             transition.isCave = true;
+                        transition.playerDialogue = playerDialogue;
                     }
                     PluginMain.SaveDataHandler.CustomPlayerData.HasGoneLake = true;
                     break;
                 case "Zone 4":
                     var transitionsZ4 = FindObjectsOfType<LevelTransition>();
+                    playerDialogue = FindObjectOfType<PlayerDialogue>();
                     foreach (var transition in transitionsZ4)
                     {
                         if (transition.SceneName == "Zone4 Cave")
                             transition.isCave = true;
+                        transition.playerDialogue = playerDialogue;
                     }
                     break;
                 case "Zone 5":
@@ -53,6 +62,17 @@ namespace Smushi_AP_Client
             if (manager == null)
                 return;
             SaveSystem._instance.SaveAllData(manager, true);
+        }
+
+        [HarmonyPatch(typeof(CandleDetector))]
+        public class CandleDetector_Patch
+        {
+            [HarmonyPatch("OnTriggerStay")]
+            [HarmonyPrefix]
+            private static bool OnTriggerStay(CandleDetector __instance, Collider other)
+            {
+                return __instance.puzzleManager.pd.hasFlint;
+            }
         }
         
         [HarmonyPatch(typeof(HomeLevelSetup))]
@@ -153,7 +173,6 @@ namespace Smushi_AP_Client
                 island.SetStateWaitingForOrb();
                 island.fader.FadeIn();
                 yield return new WaitForSeconds(1f);
-                island.capyManager.MoveCapyToTarget(1);
                 island.capySiblingDTB.ResetDialogue();
                 yield return new WaitForSeconds(0.3f);
                 island.fader.FadeOut();
@@ -223,6 +242,21 @@ namespace Smushi_AP_Client
             }
         }
 
+        [HarmonyPatch(typeof(SandCastleIsland))]
+        public class SandCastleIsland_Patch
+        {
+            [HarmonyPatch("ActivateTier2Castles")]
+            [HarmonyPrefix]
+            public static bool OnActivateTier2Castles(SandCastleIsland __instance)
+            {
+                __instance.castles[0].SetActive(false);
+                __instance.castles[1].SetActive(true);
+                __instance.rb.gameObject.SetActive(true);
+                __instance.dtbTrigger.enabled = true;
+                return false;
+            }
+        }
+
         [HarmonyPatch(typeof(IslandDockingZone))]
         public class IslandDockingZone_Patch
         {
@@ -247,7 +281,6 @@ namespace Smushi_AP_Client
                 island.currentIslandState = IslandCaveDialogueTrigger.CaveIslandState.WaitingForChungy;
                 island.fader.FadeIn();
                 yield return new WaitForSeconds(1f);
-                island.capyManager.MoveCapyToTarget(3);
                 island.capySiblingDTB.ResetDialogue();
                 yield return new WaitForSeconds(0.3f);
                 island.fader.FadeOut();
@@ -514,6 +547,14 @@ namespace Smushi_AP_Client
             [HarmonyPatch("TeleportObjectOutOfPlayer")]
             [HarmonyPostfix]
             public static void TeleportObjectOutOfPlayer(PickupController __instance, Vector3 pos)
+            {
+                __instance.tpc.gliderEnabled = PluginMain.SaveDataHandler.CustomPlayerData.HasLeaf;
+                __instance.hook.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
+            }
+
+            [HarmonyPatch("PlaceItem")]
+            [HarmonyPostfix]
+            public static void PlaceItem(PickupController __instance)
             {
                 __instance.tpc.gliderEnabled = PluginMain.SaveDataHandler.CustomPlayerData.HasLeaf;
                 __instance.hook.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
