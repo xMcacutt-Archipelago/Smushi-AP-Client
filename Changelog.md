@@ -1,6 +1,22 @@
 ﻿# Changelog
 
 ---
+## v1.0.5
+- Super Spore Found reading as Old String Found?
+- Tool of Mining and Super Spore check not shown as in logic in both unitracker and poptracker when having tool of mining and 1 hook (should be), only became in logic after receiving 2 hooks
+- Ancient Relic 1 found not checked off in unitracker (did get checked in poptracker)
+- Unitracker only showing Forest checks as in logic after collecting 2 blueberries
+- Poptracker shows Grove as accessible with <5 lotus flowers
+- Falsely received glider after putting one of the hands in for the pink flower check in garden, then immediately lost it again putting the second hand in
+- Elder’s Home cave softlocks if you don’t have headlamp
+- Could light candles on indigo island without firestarter kit
+- Rico Sacred Streamer check becomes inaccessible if you got Super Spore beforehand
+- Myrtle Pools Wind Essence (Stump) and Macrolepiota Procera are reachable with Hook, 2 Energy Spore and Super Spore
+- Ancient Relic (Brick Ledge) Only Requires Sturdy Hooks, 2 Spore of Energy and Super Spore
+- Have 2 “Ancient Relic 2”s, cant get the Ancient Relics Returned check
+- Rainbow Augmenter logic requires 1 Ring
+- Explosive Powder count bug
+- Conch warping in Sacred Holm loses your Capy
 
 ## v1.0.4
 - Fix accidental save data break on player data awake
