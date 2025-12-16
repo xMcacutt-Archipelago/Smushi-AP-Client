@@ -52,7 +52,8 @@ namespace Smushi_AP_Client
             if (currentSceneExists)
             {
                 var scene = saveSystem._slots[slotIndex].Load<string>("currentScene");
-                if (scene.Equals("Home", StringComparison.InvariantCultureIgnoreCase))
+                if (scene.Equals("Home", StringComparison.InvariantCultureIgnoreCase)
+                    && !PluginMain.SaveDataHandler.CustomPlayerData.HasGoneHome)
                     sceneIsBad = true;
                 if (scene.StartsWith("Zone 0"))
                     sceneIsBad = true;
@@ -75,7 +76,7 @@ namespace Smushi_AP_Client
                     SaveSystem.Get().Save("playerPosition", new Vector3(0, 0, 0));
                 }
             }
-            saveSystem._gameSettings.isSpeedrunnerMode = true;
+            saveSystem._gameSettings.hasBeatGameOnce = true;
             var mainMenu = FindObjectOfType<OptionsMainMenu>();
             mainMenu.LoadGame();
         }

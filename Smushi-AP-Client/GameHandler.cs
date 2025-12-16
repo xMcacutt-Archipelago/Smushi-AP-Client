@@ -84,9 +84,12 @@ namespace Smushi_AP_Client
             {
                 if (PluginMain.ArchipelagoHandler.SlotData.Goal == Goal.SmushiGoHome)
                     PluginMain.ArchipelagoHandler.Release();
+                PluginMain.SaveDataHandler.CustomPlayerData.HasGoneHome = true;
                 __instance.pd.hasBeatGame = false;
             }
         }
+        
+        [HarmonyPatch()]
 
         [HarmonyPatch(typeof(ForestHeartCutscene))]
         public class ForestHeartCutscene_Patch
@@ -95,21 +98,20 @@ namespace Smushi_AP_Client
             [HarmonyPrefix]
             public static bool StartCutscene(ForestHeartCutscene __instance)
             {
-                __instance.StartCoroutine(SkipCutsceneSpeedrunner(__instance));
+                __instance.StartCoroutine(__instance.StartCutsceneCo());
                 return false;
             }
 
-            public static IEnumerator SkipCutsceneSpeedrunner(ForestHeartCutscene __instance)
+            [HarmonyPatch("SetCutsceneEnd")]
+            [HarmonyPrefix]
+            public static bool SetCutsceneEnd(ForestHeartCutscene __instance)
             {
-                __instance.fade.FadeIn();
-                yield return (object) new WaitForSeconds(2f);
-                __instance.aug.SetActive(true);
-                __instance.myceliumPostgame.SetActive(true);
-                __instance.rosieAnim.SetBool("idleChange", true);
-                __instance.heartAnim.Play("HealIdle");
-                __instance.heartMat.color = __instance.heartColors[5];
-                foreach (GameObject heartEffect in __instance.heartEffects)
-                    heartEffect.SetActive(true);
+                __instance.StartCoroutine(EndCutscene(__instance));
+                return false;
+            } 
+            
+            private static IEnumerator EndCutscene(ForestHeartCutscene __instance)
+            {
                 __instance.ogElderNPC.SetActive(false);
                 __instance.elderNPCs.SetActive(true);
                 __instance.elderCutsceneModel.SetActive(false);
@@ -118,13 +120,14 @@ namespace Smushi_AP_Client
                 __instance.pd.solvedPuzzles.Add("forestHeartDone", false);
                 __instance.player.position = __instance.playerPosTarget.position;
                 __instance.playerModel.SetActive(true);
+                yield return (object) new WaitForSeconds(1f);
                 __instance.fade.FadeOut();
                 __instance.pd.dialogBools["heartHealed"] = true;
-                yield return new WaitForSeconds(1f);
                 __instance.dtb.ResetDialogue();
                 __instance.dialogueControls.SetActive(true);
                 __instance.rosieAnim.SetBool("idleChange", true);
                 __instance.achievementHandler.UnlockAchievement("forestHeart", 24);
+                __instance.levelMusic.PauseMusicFade(false);
                 if (PluginMain.ArchipelagoHandler.SlotData.Goal == Goal.SmushiSaveTree)
                     PluginMain.ArchipelagoHandler.Release();
             }
@@ -383,7 +386,7 @@ namespace Smushi_AP_Client
                         Destroy(transform.gameObject);
                 }
 
-                if (PluginMain.SaveDataHandler.CustomPlayerData.HasConch)
+                if (PluginMain.SaveDataHandler.CustomPlayerData.HasConch || __instance.pd.currentSceneName == "Home")
                 {
                     GameObject gameObject = Instantiate<GameObject>(__instance.conchButton, __instance.ItemContent);
                     gameObject.transform.Find("ItemIcon").GetComponent<Image>();

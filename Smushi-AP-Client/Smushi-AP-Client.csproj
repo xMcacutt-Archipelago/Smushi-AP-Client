@@ -51,6 +51,12 @@
       <Reference Include="UnityEngine.UIModule">
         <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\UnityEngine.UIModule.dll</HintPath>
       </Reference>
+      <Reference Include="YarnSpinner">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\YarnSpinner.dll</HintPath>
+      </Reference>
+      <Reference Include="YarnSpinner.Unity">
+        <HintPath>F:\SteamLibrary\steamapps\common\Smushi Come Home\Smushi Come Home_Data\Managed\YarnSpinner.Unity.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

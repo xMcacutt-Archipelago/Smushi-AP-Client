@@ -4,6 +4,7 @@ using CMF;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Playables;
+using Yarn;
 
 namespace Smushi_AP_Client
 {
@@ -686,15 +687,34 @@ namespace Smushi_AP_Client
             }
         }
 
-        [HarmonyPatch(typeof(CoinNPCBehavior))]
-        public class CoinNPCBehavior_Patch
+        [HarmonyPatch(typeof(CoinPuzzleHandler))]
+        public class CoinPuzzleHandler_Patch
         {
-            [HarmonyPatch("CheckCoins")]
-            [HarmonyPostfix]
-            public static void CheckCoins(CoinNPCBehavior __instance, bool __result)
+            [HarmonyPatch("Start")]
+            [HarmonyPrefix]
+            private static void OnStart(CoinPuzzleHandler __instance)
             {
-                if (__result)
-                    PluginMain.ArchipelagoHandler.CheckLocation(0x20E);
+                __instance.director = __instance.GetComponent<PlayableDirector>();
+                var pd = __instance.pd;
+                __instance.dialogueRunner.AddFunction("CheckCoins", 1, boolName => pd.dialogBools["coin1"] && pd.dialogBools["coin2"]);
+                if (PluginMain.ArchipelagoHandler.IsLocationChecked(0x20A))
+                    __instance.coinObjects[1].SetActive(false);
+                if (PluginMain.ArchipelagoHandler.IsLocationChecked(0x20B))
+                    __instance.coinObjects[0].SetActive(false);
+                if (__instance.hasDroppedPlatform)
+                {
+                    __instance.oilCan.position = new Vector3(942.88f, 43.69f, 1.17f);
+                    __instance.rope.localScale = new Vector3(1f, 1.95f, 1f);
+                    __instance.crystal.SetActive(false);
+                }
+                else
+                    __instance.crystal.SetActive(true);
+                if (!__instance.pd.dialogBools["completedCoinActivity"])
+                    return;
+                __instance.envCoinObjects[0].SetActive(true);
+                __instance.envCoinObjects[1].SetActive(true);
+                __instance.envCoinObjects[2].SetActive(true);
+                __instance.envCoinObjects[3].SetActive(false);
             }
         }
         
