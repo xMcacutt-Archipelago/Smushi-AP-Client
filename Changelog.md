@@ -1,6 +1,15 @@
 ﻿# Changelog
 
 ---
+## v1.0.6
+- Various logic changes
+- Fix Ancient Relics Returned not working
+- Force Smushi Home on finishing base game
+- Allow player to use conch in Smushi Home
+- Added I'm Stuck button to pause menu
+- Pickups respawn to avoid locks with glitch logic
+- Speedrun mode no longer forced but always available in menu
+
 ## v1.0.5
 - Super Spore Found reading as Old String Found?
 - Tool of Mining and Super Spore check not shown as in logic in both unitracker and poptracker when having tool of mining and 1 hook (should be), only became in logic after receiving 2 hooks
