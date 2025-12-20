@@ -129,7 +129,7 @@ public class ItemPreventionHandler
         [HarmonyPostfix]
         private static void OnStart(BombDoorPuzzle __instance)
         {
-            __instance.bombPickup.SetActive(value: false);
+            __instance.bombPickup.SetActive(value: true);
         }
     }
 

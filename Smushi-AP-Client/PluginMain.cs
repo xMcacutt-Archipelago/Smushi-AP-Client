@@ -14,7 +14,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Smushi_AP_Client 
 {
-    [BepInPlugin("SmushiAPClient", "Smushi AP Client", "1.0")]
+    [BepInPlugin("SmushiAPClient", "Smushi AP Client", "1.0.7")]
     public class PluginMain : BaseUnityPlugin
     {
         public static LoginHandler LoginHandler;

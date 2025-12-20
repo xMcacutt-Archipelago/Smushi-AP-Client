@@ -716,6 +716,10 @@ namespace Smushi_AP_Client
                 __instance.envCoinObjects[2].SetActive(true);
                 __instance.envCoinObjects[3].SetActive(false);
             }
+            
+            [HarmonyPatch("CoinReward")]
+            [HarmonyPostfix]
+            public static void OnCoinReward() { PluginMain.ArchipelagoHandler.CheckLocation(0x20E); }
         }
         
         // Sacred Streamer 1 Obtained  
@@ -890,8 +894,7 @@ namespace Smushi_AP_Client
                 __instance.uiFade.FadeOut();
                 yield return new WaitForSeconds(0.5f);
                 __instance.hook.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHooks;
-                __instance.miner.canMine = PluginMain.SaveDataHandler.CustomPlayerData.HasHexKey;
-                __instance.pd.hasHexkey = PluginMain.SaveDataHandler.CustomPlayerData.HasHexKey;
+                __instance.miner.enabled = PluginMain.SaveDataHandler.CustomPlayerData.HasHexKey;
                 if (__instance.rockCount == 2)
                 {
                     __instance.dtb.StartDialogue("DiverEndSuccess");

@@ -40,9 +40,19 @@ public class StuckHandler : MonoBehaviour
 
         private static void OnStuckClicked()
         {
-            var outOfBoundsTeleport = FindObjectOfType<OutOfBoundsTeleport>();
-            if (outOfBoundsTeleport != null)
-                outOfBoundsTeleport.player.position = outOfBoundsTeleport.teleportPlayerHere.position;
+            var outOfBoundsTeleports = FindObjectsOfType<OutOfBoundsTeleport>();
+            OutOfBoundsTeleport closestTeleport = null;
+            var shortestDistance = float.MaxValue;
+            foreach (var outOfBoundsTeleport in outOfBoundsTeleports)
+            {
+                var distance = (outOfBoundsTeleport.transform.position - outOfBoundsTeleport.player.position).sqrMagnitude;
+                if (distance >= shortestDistance)
+                    continue;
+                shortestDistance = distance;
+                closestTeleport = outOfBoundsTeleport;
+            }
+            if (closestTeleport != null)
+                closestTeleport.player.position = closestTeleport.teleportPlayerHere.position;
             instance.ExitPauseMenu();
             instance.isOpen = false;
             instance.blackFade.FadeOut();

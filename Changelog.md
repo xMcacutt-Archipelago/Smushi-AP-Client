@@ -1,6 +1,15 @@
 ﻿# Changelog
 
 ---
+## v1.0.7
+- Various logic changes
+- Fix pop tracker not requiring mycology journal for Macrolepiota Procera
+- Make Stuck handling use the nearest out of bounds to the player
+- Fix dynamite missing from Elder's Home jar
+- Actually fix Ancient Relics Returned
+- Correctly flush queue on connection to avoid dropped items while offline
+- Fix Clavaria rock collecting mission not re-enabling miner
+
 ## v1.0.6
 - Various logic changes
 - Fix Ancient Relics Returned not working

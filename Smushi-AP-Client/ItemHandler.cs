@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using Archipelago.MultiClient.Net.Models;
 using CMF;
+using HarmonyLib;
 using UnityEngine;
 
 namespace Smushi_AP_Client
@@ -122,7 +123,7 @@ namespace Smushi_AP_Client
             }
         }
         
-        private void FlushQueue()
+        public void FlushQueue()
         {
             if (!TryGetHandlers(out var manager, out var playerData, out var movement, out var inventory))
                 return;
@@ -438,6 +439,38 @@ namespace Smushi_AP_Client
                     throw new ArgumentOutOfRangeException();
             }
             SaveSystem._instance.SaveAllData(manager, true);
+        }
+
+        [HarmonyPatch(typeof(PlayerData))]
+        public class PlayerData_Patch
+        {
+            [HarmonyPatch("Awake")]
+            [HarmonyPostfix]
+            public static void Start_Postfix() { PluginMain.ItemHandler.FlushQueue(); }
+        }
+        
+        [HarmonyPatch(typeof(SaveLoadManager))]
+        public class SaveLoadManager_Patch
+        {
+            [HarmonyPatch("LoadData")]
+            [HarmonyPostfix]
+            public static void Start_Postfix() { PluginMain.ItemHandler.FlushQueue(); }
+        }
+        
+        [HarmonyPatch(typeof(InventoryManager))]
+        public class InventoryManager_Patch
+        {
+            [HarmonyPatch("Start")]
+            [HarmonyPostfix]
+            public static void Start_Postfix() { PluginMain.ItemHandler.FlushQueue(); }
+        }
+        
+        [HarmonyPatch(typeof(AdvancedWalkerController))]
+        public class AdvancedWalkerController_Patch
+        {
+            [HarmonyPatch("Start")]
+            [HarmonyPostfix]
+            public static void Start_Postfix() { PluginMain.ItemHandler.FlushQueue(); }
         }
     }
 }
