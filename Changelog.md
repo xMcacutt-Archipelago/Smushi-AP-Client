@@ -1,6 +1,40 @@
 ﻿# Changelog
 
 ---
+## v1.0.9
+No Client Changes
+
+Poptracker aligned with apworld
+### Logic
+- Ancient Relics Returned logic says it’s possible without Ancient Relics
+- Strawberry Augmenter logic says it’s possible without Band of Elasticity
+- Hygrocybe Conica logic may be wrong. Should be possible with Leaf, Hook lvl 1, and Tool of Mining OR Leaf and Hook lvl 2
+- Secret Opener Found logic should include Hooks lvl 2
+- Macrolepiota Procera and Myrtle Pools Wind Essence accessible with 2 Energy Spore and 2
+- Hooks (and mycology journal for the mushroom obviously)
+
+
+## v1.0.8
+No Client Changes
+### Poptracker
+- Sacred Streamer 2 (Web Area) shown as accessible without Bandaid (Advanced Logic)
+- Ancient Relic 1 location checks off Ancient Relic 2 and vice versa
+### Logic
+- Container of Light Found: Possible with Leaf and Hooks lvl 1
+- Ink Augmenter: Should require Sturdy Hooks
+- Looks like UT isn’t showing any Advanced Logic checks?
+- Secret Augmenter: Possible with nothing
+- Cave Blueberry: Not possible with just Leaf and Blade of Power
+- Strawberry Augmenter: Possible with Sprint and Band of Elasticity
+- Blue Flower Shrine: Possible with just Sprint
+- Ancient Relic 1 (Yen): Possible with Sprint, Super Spore, Tool of Mining, and Hooks lvl 1
+- Fall: Can enter with nothing
+- Explosive Powder 1 Found: Possible with Hooks lvl 1 OR Leaf OR Blade of Power OR Sprint and Super Spore
+- Cryptic Caverns Wind Essence: Possible with just leaf
+- Dark Cave Energy Spore: Possible with Sprint, Super Spore, Hooks lvl 1, Firestarter Kit
+- Lake: Can enter with Hooks lvl 1 OR Leaf OR Blade of Power OR Sprint and Super Spore
+- Heart of the Forest: Can clip into the tree with the key fragment. Possible with Hooks lvl 1
+
 ## v1.0.7
 - Various logic changes
 - Fix pop tracker not requiring mycology journal for Macrolepiota Procera
