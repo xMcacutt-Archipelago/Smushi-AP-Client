@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using BepInEx;
+using BepInEx.Configuration;
 using CMF;
 using HarmonyLib;
 using Rewired.Integration.UnityUI;
@@ -14,9 +15,10 @@ using Debug = UnityEngine.Debug;
 
 namespace Smushi_AP_Client 
 {
-    [BepInPlugin("SmushiAPClient", "Smushi AP Client", "1.0.7")]
+    [BepInPlugin("SmushiAPClient", "Smushi AP Client", "1.0.8")]
     public class PluginMain : BaseUnityPlugin
     {
+        public static ConfigEntry<bool> FilterLog;
         public static LoginHandler LoginHandler;
         public static SaveDataHandler SaveDataHandler;
         public static ArchipelagoHandler ArchipelagoHandler;
@@ -53,6 +55,13 @@ namespace Smushi_AP_Client
                     rewiredInputModule.allowMouseInputIfTouchSupported = true;
                 }
             };
+            
+            FilterLog = Config.Bind(
+                "Logging",
+                "FilterLog",
+                false,
+                "Filter the archipelago log to only show messages relevant to you."
+            );
         }
 
         private IEnumerator EnableMouse()

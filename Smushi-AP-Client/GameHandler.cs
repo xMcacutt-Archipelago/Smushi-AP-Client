@@ -88,8 +88,17 @@ namespace Smushi_AP_Client
                 __instance.pd.hasBeatGame = false;
             }
         }
-        
-        [HarmonyPatch()]
+
+        [HarmonyPatch(typeof(SettingsConfigMainMenu))]
+        public class SettingsConfigMainMenu_Patch
+        {
+            [HarmonyPatch(nameof(SettingsConfigMainMenu.LoadSettings))]
+            [HarmonyPostfix]
+            public static void LoadSettings(SettingsConfigMainMenu __instance)
+            {
+                __instance.speedRunnerButton.SetActive(true);
+            }
+        }
 
         [HarmonyPatch(typeof(ForestHeartCutscene))]
         public class ForestHeartCutscene_Patch

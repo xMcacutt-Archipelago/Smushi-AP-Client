@@ -2,12 +2,15 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Colors;
 using Archipelago.MultiClient.Net.Converters;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
+using Archipelago.MultiClient.Net.MessageLog.Parts;
 using Archipelago.MultiClient.Net.Packets;
 
 namespace Smushi_AP_Client
@@ -43,6 +46,26 @@ namespace Smushi_AP_Client
 
         public string Seed { get; set; }
         private double SlotInstance { get; set; }
+        
+        private static string GetColorHex(PaletteColor? color)
+        {
+            return color switch
+            {
+                PaletteColor.Red => "#EE0000",
+                PaletteColor.Green => "#00FF7F",
+                PaletteColor.Yellow => "#FAFAD2",
+                PaletteColor.Blue => "#6495ED",
+                PaletteColor.Magenta => "#EE00EE",
+                PaletteColor.Cyan => "#00EEEE",
+                PaletteColor.Black => "#000000",
+                PaletteColor.White => "#FFFFFF",
+                PaletteColor.SlateBlue => "#6D8BE8",
+                PaletteColor.Salmon => "#FA8072",
+                PaletteColor.Plum => "#AF99EF",
+                _ => "#FFFFFF" // Default to white
+            };
+        }
+
 
         private void CreateSession()
         {
@@ -169,9 +192,31 @@ namespace Smushi_AP_Client
             _session.Socket.SendPacket(packet);
         }
 
-        private static void OnMessageReceived(LogMessage message)
+        private void OnMessageReceived(LogMessage message)
         {
-            APConsole.Instance.Log(message.ToString() ?? string.Empty);
+            string messageStr;
+            if (message.Parts.Any(x => x.Type == MessagePartType.Player) &&
+                PluginMain.FilterLog != null && 
+                PluginMain.FilterLog.Value && 
+                !message.Parts.Any(x => x.Text.Contains(_session!.Players.GetPlayerName(_session.ConnectionInfo.Slot))))
+                return;
+            if (message.Parts.Length == 1)
+            {
+                messageStr = message.Parts[0].Text;
+            }
+            else
+            {
+                var builder = new StringBuilder();
+                foreach (var part in message.Parts)
+                {
+                    var hexColor = GetColorHex(part.PaletteColor);
+                    builder.Append($"<color={hexColor}>{part.Text}</color>");
+                }
+
+                messageStr = builder.ToString();
+            }
+
+            APConsole.Instance.Log(messageStr);
         }
     }
 }

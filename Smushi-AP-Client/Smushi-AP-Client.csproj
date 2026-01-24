@@ -68,9 +68,10 @@
                 DestinationFolder="$(ProjectDir)Package\Smushi_Archipelago"
                 OverwriteReadOnlyFiles="true" />
         <Copy
-                SourceFiles="$(ProjectDir)../README.md"
+                SourceFiles="$(ProjectDir)..\README.md"
                 DestinationFolder="$(ProjectDir)Package"
                 OverwriteReadOnlyFiles="true" />
         <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ProjectDir)Package\*' -DestinationPath '$(ProjectDir)xMcacutt-Smushi_Archipelago.zip' -Force&quot;" />
+        <Exec Command="tar -czf $(ProjectDir)xMcacutt-Smushi_Archipelago.tar.gz -C $(ProjectDir)Package ." />
     </Target>
 </Project>

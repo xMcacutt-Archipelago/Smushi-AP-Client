@@ -1,10 +1,17 @@
 ﻿# Changelog
 
 ---
-## v1.0.9
+
+## Client v1.0.8 | apworld v1.0.9
+
+- Added option to filter log to only show messages relevant to your game
+- Fixed speedrunner menu option not appearing
+
+## Client v1.0.7 | apworld v1.0.9
 No Client Changes
 
 Poptracker aligned with apworld
+
 ### Logic
 - Ancient Relics Returned logic says it’s possible without Ancient Relics
 - Strawberry Augmenter logic says it’s possible without Band of Elasticity
